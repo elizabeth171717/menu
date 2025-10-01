@@ -1,7 +1,13 @@
 // src/components/CustomerMenu.jsx
 import React, { useEffect, useState } from "react";
 
-const CLIENT_ID = "universalmenu"; // 👈 use your actual restaurant/client ID
+// Use environment variables instead of hardcoding
+const BACKEND_URL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL_PRODUCTION
+    : import.meta.env.VITE_BACKEND_URL_DEVELOPMENT;
+
+const CLIENT_ID = import.meta.env.VITE_CLIENT; // 👈 pulled from .env
 
 export default function CustomerMenu() {
   const [menu, setMenu] = useState(null);
@@ -10,7 +16,7 @@ export default function CustomerMenu() {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/${CLIENT_ID}/menu`);
+        const res = await fetch(`${BACKEND_URL}/api/${CLIENT_ID}/menu`);
         const data = await res.json();
         setMenu(data);
       } catch (err) {
