@@ -100,7 +100,10 @@ export default function CustomerMenu() {
 
                   <h3 style={{ marginBottom: "0.5rem" }}>{item.name}</h3>
                   <p style={{ marginBottom: "0.5rem" }}>{item.description}</p>
-                  <p style={{ fontWeight: "bold" }}>${item.price.toFixed(2)}</p>
+
+                  <p style={{ fontWeight: "bold" }}>
+                    ${Number(item.price || 0).toFixed(2)}
+                  </p>
 
                   {/* 👇 If unavailable, show message */}
                   {!item.available && (
@@ -119,7 +122,9 @@ export default function CustomerMenu() {
                         {item.modifiers.map((mod) => (
                           <li key={mod.id}>
                             {mod.name}
-                            {mod.price > 0 && ` ($${mod.price.toFixed(2)})`}
+
+                            {mod.price > 0 &&
+                              ` ($${Number(mod.price || 0).toFixed(2)})`}
                           </li>
                         ))}
                       </ul>

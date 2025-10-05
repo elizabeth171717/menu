@@ -603,7 +603,8 @@ const UniversalMenuForm = () => {
                     </>
                   ) : (
                     <>
-                      <strong>{d.name}</strong> - ${d.price.toFixed(2)}
+                      <strong>{d.name}</strong> - $
+                      {Number(d.price || 0).toFixed(2)}
                       {!d.available && (
                         <span style={{ color: "red" }}> (86’d)</span>
                       )}
@@ -626,7 +627,8 @@ const UniversalMenuForm = () => {
                           {d.modifiers.map((m) => (
                             <li key={m.id}>
                               {m.name}{" "}
-                              {m.price > 0 && `(+${m.price.toFixed(2)})`}
+                              {m.price > 0 &&
+                                `(+${Number(m.price || 0).toFixed(2)})`}
                             </li>
                           ))}
                         </ul>
