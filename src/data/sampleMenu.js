@@ -13,6 +13,12 @@ export const sampleMenu = {
           description: "Crispy rolls stuffed with vegetables.",
           price: 5.99,
           image: "https://source.unsplash.com/400x300/?spring-rolls",
+          available: true,   // ✅ mark false if 86'd
+          visible: true,     // ✅ hide/show toggle
+          modifiers: [       // ✅ optional add-ons
+            { id: "m1", name: "Extra Sauce", price: 0.5 },
+            { id: "m2", name: "Spicy", price: 0 },
+          ],
         },
         {
           id: "ap2",
@@ -20,6 +26,9 @@ export const sampleMenu = {
           description: "Toasted bread with garlic and herbs.",
           price: 4.49,
           image: "https://source.unsplash.com/400x300/?garlic-bread",
+          available: false,  // ❌ currently 86’d
+          visible: true,
+          modifiers: [],
         },
         {
           id: "ap3",
@@ -27,6 +36,9 @@ export const sampleMenu = {
           description: "Grilled bread with tomato and basil.",
           price: 6.25,
           image: "https://source.unsplash.com/400x300/?bruschetta",
+          available: true,
+          visible: false,    // 🔒 hidden from menu
+          modifiers: [],
         },
       ],
     },
@@ -40,6 +52,12 @@ export const sampleMenu = {
           description: "Juicy grilled chicken with herbs.",
           price: 12.99,
           image: "https://source.unsplash.com/400x300/?grilled-chicken",
+          available: true,
+          visible: true,
+          modifiers: [
+            { id: "m3", name: "Add Rice", price: 2 },
+            { id: "m4", name: "Extra Veggies", price: 1.5 },
+          ],
         },
         {
           id: "mn2",
@@ -47,6 +65,11 @@ export const sampleMenu = {
           description: "Pasta tossed with fresh vegetables.",
           price: 10.49,
           image: "https://source.unsplash.com/400x300/?pasta",
+          available: true,
+          visible: true,
+          modifiers: [
+            { id: "m5", name: "Gluten-Free Pasta", price: 1 },
+          ],
         },
         {
           id: "mn3",
@@ -54,6 +77,13 @@ export const sampleMenu = {
           description: "Beef patty with melted cheese and fries.",
           price: 11.99,
           image: "https://source.unsplash.com/400x300/?burger",
+          available: true,
+          visible: true,
+          modifiers: [
+            { id: "m6", name: "Add Bacon", price: 2 },
+            { id: "m7", name: "Extra Cheese", price: 1 },
+            { id: "m8", name: "No Onions", price: 0 },
+          ],
         },
       ],
     },
@@ -67,6 +97,9 @@ export const sampleMenu = {
           description: "Rich and moist chocolate cake.",
           price: 6.99,
           image: "https://source.unsplash.com/400x300/?chocolate-cake",
+          available: true,
+          visible: true,
+          modifiers: [],
         },
         {
           id: "ds2",
@@ -74,6 +107,12 @@ export const sampleMenu = {
           description: "Creamy cheesecake with berry topping.",
           price: 7.49,
           image: "https://source.unsplash.com/400x300/?cheesecake",
+          available: true,
+          visible: true,
+          modifiers: [
+            { id: "m9", name: "Strawberry Topping", price: 1 },
+            { id: "m10", name: "Chocolate Syrup", price: 1 },
+          ],
         },
         {
           id: "ds3",
@@ -81,6 +120,12 @@ export const sampleMenu = {
           description: "Two scoops of vanilla or chocolate.",
           price: 4.99,
           image: "https://source.unsplash.com/400x300/?ice-cream",
+          available: true,
+          visible: true,
+          modifiers: [
+            { id: "m11", name: "Add Sprinkles", price: 0.5 },
+            { id: "m12", name: "Whipped Cream", price: 0.75 },
+          ],
         },
       ],
     },
@@ -94,6 +139,9 @@ export const sampleMenu = {
           description: "Chilled Coke",
           price: 1.99,
           image: "https://source.unsplash.com/400x300/?coca-cola",
+          available: true,
+          visible: true,
+          modifiers: [],
         },
         {
           id: "dr2",
@@ -101,6 +149,9 @@ export const sampleMenu = {
           description: "Freshly squeezed orange juice.",
           price: 2.49,
           image: "https://source.unsplash.com/400x300/?orange-juice",
+          available: true,
+          visible: true,
+          modifiers: [],
         },
         {
           id: "dr3",
@@ -108,6 +159,12 @@ export const sampleMenu = {
           description: "Hot brewed coffee.",
           price: 2.99,
           image: "https://source.unsplash.com/400x300/?coffee",
+          available: true,
+          visible: true,
+          modifiers: [
+            { id: "m13", name: "Add Milk", price: 0.5 },
+            { id: "m14", name: "Extra Shot", price: 1 },
+          ],
         },
       ],
     },

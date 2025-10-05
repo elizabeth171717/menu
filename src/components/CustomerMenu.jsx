@@ -1,4 +1,3 @@
-// src/components/CustomerMenu.jsx
 import React, { useEffect, useState } from "react";
 
 // Use environment variables instead of hardcoding
@@ -45,61 +44,93 @@ export default function CustomerMenu() {
       </h1>
 
       {/* Sections */}
-      {menu.sections.map((section) => (
-        <div key={section.id || section._id} style={{ marginBottom: "3rem" }}>
-          <h2
-            style={{
-              fontSize: "1.5rem",
-              borderBottom: "2px solid #ddd",
-              marginBottom: "1rem",
-              paddingBottom: "0.5rem",
-              textTransform: "capitalize",
-            }}
-          >
-            {section.section}
-          </h2>
+      {menu.sections.map((section) => {
+        const visibleItems = (section.items || []).filter(
+          (item) => item.visible !== false // 👈 still hide if "hidden"
+        );
 
-          {/* Items inside section */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-              gap: "1.5rem",
-            }}
-          >
-            {section.items.map((item) => (
-              <div
-                key={item.id || item._id}
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "1rem",
-                  borderRadius: "10px",
-                  textAlign: "center",
-                }}
-              >
-                {/* Dish image */}
-                {item.image && (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: "100%",
-                      height: "150px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                      marginBottom: "0.8rem",
-                    }}
-                  />
-                )}
+        if (visibleItems.length === 0) return null;
 
-                <h3 style={{ marginBottom: "0.5rem" }}>{item.name}</h3>
-                <p style={{ marginBottom: "0.5rem" }}>{item.description}</p>
-                <p style={{ fontWeight: "bold" }}>${item.price.toFixed(2)}</p>
-              </div>
-            ))}
+        return (
+          <div key={section.id || section._id} style={{ marginBottom: "3rem" }}>
+            <h2
+              style={{
+                fontSize: "1.5rem",
+                borderBottom: "2px solid #ddd",
+                marginBottom: "1rem",
+                paddingBottom: "0.5rem",
+                textTransform: "capitalize",
+              }}
+            >
+              {section.section}
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                gap: "1.5rem",
+              }}
+            >
+              {visibleItems.map((item) => (
+                <div
+                  key={item.id || item._id}
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "1rem",
+                    borderRadius: "10px",
+                    textAlign: "center",
+                    opacity: item.available ? 1 : 0.6, // dim unavailable items
+                  }}
+                >
+                  {/* Dish image */}
+                  {item.image && (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{
+                        width: "100%",
+                        height: "150px",
+                        objectFit: "cover",
+                        borderRadius: "8px",
+                        marginBottom: "0.8rem",
+                      }}
+                    />
+                  )}
+
+                  <h3 style={{ marginBottom: "0.5rem" }}>{item.name}</h3>
+                  <p style={{ marginBottom: "0.5rem" }}>{item.description}</p>
+                  <p style={{ fontWeight: "bold" }}>${item.price.toFixed(2)}</p>
+
+                  {/* 👇 If unavailable, show message */}
+                  {!item.available && (
+                    <p style={{ color: "red", fontWeight: "bold" }}>
+                      ❌ Unavailable
+                    </p>
+                  )}
+
+                  {/* Modifiers */}
+                  {item.modifiers && item.modifiers.length > 0 && (
+                    <div style={{ marginTop: "0.5rem", textAlign: "left" }}>
+                      <p style={{ fontWeight: "bold", marginBottom: "0.3rem" }}>
+                        Options:
+                      </p>
+                      <ul style={{ paddingLeft: "1rem", margin: 0 }}>
+                        {item.modifiers.map((mod) => (
+                          <li key={mod.id}>
+                            {mod.name}
+                            {mod.price > 0 && ` ($${mod.price.toFixed(2)})`}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

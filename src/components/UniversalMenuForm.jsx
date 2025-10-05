@@ -27,6 +27,9 @@ const UniversalMenuForm = () => {
     description: "",
     price: "",
     image: "",
+    available: true,
+    visible: true,
+    modifiers: [],
   });
 
   const [editingDish, setEditingDish] = useState({
@@ -106,7 +109,15 @@ const UniversalMenuForm = () => {
   // ------------------- Dish Handlers -------------------
   const startAddingDish = (sectionId) => {
     setAddingDishSectionId(sectionId);
-    setDishDraft({ name: "", description: "", price: "", image: "" });
+    setDishDraft({
+      name: "",
+      description: "",
+      price: "",
+      image: "",
+      available: true,
+      visible: true,
+      modifiers: [],
+    });
   };
 
   const saveDish = (sectionId) => {
@@ -116,6 +127,9 @@ const UniversalMenuForm = () => {
       description: dishDraft.description,
       price: parseFloat(dishDraft.price),
       image: dishDraft.image,
+      available: dishDraft.available,
+      visible: dishDraft.visible,
+      modifiers: dishDraft.modifiers,
     };
     setSections(
       sections.map((s) =>
@@ -127,7 +141,15 @@ const UniversalMenuForm = () => {
 
   const cancelAddDish = () => {
     setAddingDishSectionId(null);
-    setDishDraft({ name: "", description: "", price: "", image: "" });
+    setDishDraft({
+      name: "",
+      description: "",
+      price: "",
+      image: "",
+      available: true,
+      visible: true,
+      modifiers: [],
+    });
   };
 
   const editDish = (sectionId, dish) => {
@@ -376,7 +398,37 @@ const UniversalMenuForm = () => {
                   }
                   style={{ marginRight: "0.25rem" }}
                 />
-
+                <input
+                  type="text"
+                  placeholder="Description"
+                  value={dishDraft.description}
+                  onChange={(e) =>
+                    setDishDraft({ ...dishDraft, description: e.target.value })
+                  }
+                />
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={dishDraft.available}
+                    onChange={(e) =>
+                      setDishDraft({
+                        ...dishDraft,
+                        available: e.target.checked,
+                      })
+                    }
+                  />
+                  Available
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={dishDraft.visible}
+                    onChange={(e) =>
+                      setDishDraft({ ...dishDraft, visible: e.target.checked })
+                    }
+                  />
+                  Visible
+                </label>
                 <input
                   type="file"
                   onChange={(e) => handleImageChange(e, "add")}
@@ -434,16 +486,130 @@ const UniversalMenuForm = () => {
                         style={{ marginLeft: "0.25rem" }}
                       />
 
+                      {/* ✅ Toggles */}
+                      <label style={{ marginLeft: "0.5rem" }}>
+                        <input
+                          type="checkbox"
+                          checked={editingDish.draft.available}
+                          onChange={(e) =>
+                            setEditingDish({
+                              ...editingDish,
+                              draft: {
+                                ...editingDish.draft,
+                                available: e.target.checked,
+                              },
+                            })
+                          }
+                        />{" "}
+                        Available
+                      </label>
+                      <label style={{ marginLeft: "0.5rem" }}>
+                        <input
+                          type="checkbox"
+                          checked={editingDish.draft.visible}
+                          onChange={(e) =>
+                            setEditingDish({
+                              ...editingDish,
+                              draft: {
+                                ...editingDish.draft,
+                                visible: e.target.checked,
+                              },
+                            })
+                          }
+                        />{" "}
+                        Visible
+                      </label>
+
                       <input
                         type="file"
                         onChange={(e) => handleImageChange(e, "edit")}
                       />
                       <button onClick={saveEditedDish}>Save</button>
                       <button onClick={cancelEditDish}>Cancel</button>
+
+                      {/* ✅ Modifier Editing */}
+                      <div style={{ marginTop: "0.5rem" }}>
+                        <strong>Modifiers:</strong>
+                        {editingDish.draft.modifiers?.map((m, idx) => (
+                          <div key={m.id || idx}>
+                            <input
+                              type="text"
+                              value={m.name}
+                              placeholder="Modifier name"
+                              onChange={(e) => {
+                                const updatedMods =
+                                  editingDish.draft.modifiers.map((mod, i) =>
+                                    i === idx
+                                      ? { ...mod, name: e.target.value }
+                                      : mod
+                                  );
+                                setEditingDish({
+                                  ...editingDish,
+                                  draft: {
+                                    ...editingDish.draft,
+                                    modifiers: updatedMods,
+                                  },
+                                });
+                              }}
+                            />
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={m.price}
+                              placeholder="Price"
+                              onChange={(e) => {
+                                const updatedMods =
+                                  editingDish.draft.modifiers.map((mod, i) =>
+                                    i === idx
+                                      ? {
+                                          ...mod,
+                                          price: parseFloat(e.target.value),
+                                        }
+                                      : mod
+                                  );
+                                setEditingDish({
+                                  ...editingDish,
+                                  draft: {
+                                    ...editingDish.draft,
+                                    modifiers: updatedMods,
+                                  },
+                                });
+                              }}
+                              style={{ width: "80px", marginLeft: "0.25rem" }}
+                            />
+                          </div>
+                        ))}
+                        <button
+                          onClick={() =>
+                            setEditingDish({
+                              ...editingDish,
+                              draft: {
+                                ...editingDish.draft,
+                                modifiers: [
+                                  ...(editingDish.draft.modifiers || []),
+                                  {
+                                    id: Date.now().toString(),
+                                    name: "",
+                                    price: 0,
+                                  },
+                                ],
+                              },
+                            })
+                          }
+                        >
+                          + Add Modifier
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
                       <strong>{d.name}</strong> - ${d.price.toFixed(2)}
+                      {!d.available && (
+                        <span style={{ color: "red" }}> (86’d)</span>
+                      )}
+                      {!d.visible && (
+                        <span style={{ color: "gray" }}> (Hidden)</span>
+                      )}
                       <br />
                       <em>{d.description}</em>
                       <br />
@@ -453,6 +619,17 @@ const UniversalMenuForm = () => {
                           alt={d.name}
                           style={{ width: "100px", borderRadius: "4px" }}
                         />
+                      )}
+                      {/* Show modifiers in view mode */}
+                      {d.modifiers?.length > 0 && (
+                        <ul style={{ marginTop: "0.5rem" }}>
+                          {d.modifiers.map((m) => (
+                            <li key={m.id}>
+                              {m.name}{" "}
+                              {m.price > 0 && `(+${m.price.toFixed(2)})`}
+                            </li>
+                          ))}
+                        </ul>
                       )}
                       <button
                         style={{ marginLeft: "0.25rem" }}
