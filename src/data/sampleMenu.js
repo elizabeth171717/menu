@@ -1,11 +1,10 @@
-// data/sampleMenu.js
-
 export const sampleMenu = {
   restaurantName: "Sample Restaurant",
   sections: [
     {
       id: "1",
       section: "Appetizers",
+      groups: [], // 👈 No groups in this section
       items: [
         {
           id: "ap1",
@@ -13,9 +12,9 @@ export const sampleMenu = {
           description: "Crispy rolls stuffed with vegetables.",
           price: 5.99,
           image: "https://source.unsplash.com/400x300/?spring-rolls",
-          available: true,   // ✅ mark false if 86'd
-          visible: true,     // ✅ hide/show toggle
-          modifiers: [       // ✅ optional add-ons
+          available: true,
+          visible: true,
+          modifiers: [
             { id: "m1", name: "Extra Sauce", price: 0.5 },
             { id: "m2", name: "Spicy", price: 0 },
           ],
@@ -26,7 +25,7 @@ export const sampleMenu = {
           description: "Toasted bread with garlic and herbs.",
           price: 4.49,
           image: "https://source.unsplash.com/400x300/?garlic-bread",
-          available: false,  // ❌ currently 86’d
+          available: false,
           visible: true,
           modifiers: [],
         },
@@ -37,7 +36,7 @@ export const sampleMenu = {
           price: 6.25,
           image: "https://source.unsplash.com/400x300/?bruschetta",
           available: true,
-          visible: false,    // 🔒 hidden from menu
+          visible: false,
           modifiers: [],
         },
       ],
@@ -45,6 +44,7 @@ export const sampleMenu = {
     {
       id: "2",
       section: "Mains",
+      groups: [], // 👈 optional empty if not grouping yet
       items: [
         {
           id: "mn1",
@@ -90,6 +90,7 @@ export const sampleMenu = {
     {
       id: "3",
       section: "Desserts",
+      groups: [], // 👈 still allowed
       items: [
         {
           id: "ds1",
@@ -132,27 +133,61 @@ export const sampleMenu = {
     {
       id: "4",
       section: "Drinks",
+      groups: [
+        {
+          id: "g1",
+          groupName: "Atole", // 👈 group within Drinks
+          items: [
+            {
+              id: "drA1",
+              name: "Atole de Elote",
+              description: "Sweet corn-based traditional atole.",
+              price: 3.99,
+              image: "https://source.unsplash.com/400x300/?corn-drink",
+              available: true,
+              visible: true,
+              modifiers: [],
+            },
+            {
+              id: "drA2",
+              name: "Champurrado",
+              description: "Thick Mexican chocolate atole.",
+              price: 4.49,
+              image: "https://source.unsplash.com/400x300/?champurrado",
+              available: true,
+              visible: true,
+              modifiers: [],
+            },
+          ],
+        },
+        {
+          id: "g2",
+          groupName: "Aguas Frescas", // 👈 another optional group
+          items: [
+            {
+              id: "drF1",
+              name: "Horchata",
+              description: "Rice and cinnamon drink.",
+              price: 2.99,
+              image: "https://source.unsplash.com/400x300/?horchata",
+              available: true,
+              visible: true,
+              modifiers: [],
+            },
+            {
+              id: "drF2",
+              name: "Jamaica",
+              description: "Hibiscus flower tea served cold.",
+              price: 2.99,
+              image: "https://source.unsplash.com/400x300/?jamaica-drink",
+              available: true,
+              visible: true,
+              modifiers: [],
+            },
+          ],
+        },
+      ],
       items: [
-        {
-          id: "dr1",
-          name: "Coca-Cola",
-          description: "Chilled Coke",
-          price: 1.99,
-          image: "https://source.unsplash.com/400x300/?coca-cola",
-          available: true,
-          visible: true,
-          modifiers: [],
-        },
-        {
-          id: "dr2",
-          name: "Orange Juice",
-          description: "Freshly squeezed orange juice.",
-          price: 2.49,
-          image: "https://source.unsplash.com/400x300/?orange-juice",
-          available: true,
-          visible: true,
-          modifiers: [],
-        },
         {
           id: "dr3",
           name: "Coffee",

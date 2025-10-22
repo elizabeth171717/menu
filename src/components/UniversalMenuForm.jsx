@@ -21,7 +21,9 @@ const UniversalMenuForm = () => {
   const [editingSectionId, setEditingSectionId] = useState(null);
   const [sectionDraftName, setSectionDraftName] = useState("");
 
+  // Will hold { sectionId, groupId } while adding (groupId optional)
   const [addingDishSectionId, setAddingDishSectionId] = useState(null);
+
   const [dishDraft, setDishDraft] = useState({
     name: "",
     description: "",
@@ -32,10 +34,21 @@ const UniversalMenuForm = () => {
     modifiers: [],
   });
 
+  const [addingGroupSectionId, setAddingGroupSectionId] = useState(null);
+  const [groupDraftName, setGroupDraftName] = useState("");
+  const [editingGroup, setEditingGroup] = useState({
+    sectionId: null,
+    groupId: null,
+    name: "",
+  });
+
+  // editingDish now supports optional groupId and a transient 'moveTarget' used in the edit panel
   const [editingDish, setEditingDish] = useState({
     sectionId: null,
+    groupId: null,
     dishId: null,
     draft: {},
+    moveTarget: "", // "" = no action, "section" = move to section (ungroup), or groupId
   });
 
   useEffect(() => {
@@ -45,17 +58,31 @@ const UniversalMenuForm = () => {
         const data = await res.json();
 
         if (data?.sections?.length > 0) {
+          const normalized = data.sections.map((s) => ({
+            ...s,
+            groups: s.groups || [],
+            items: s.items || [],
+          }));
           setRestaurantName(data.restaurantName);
-          setSections(data.sections);
+          setSections(normalized);
         } else {
-          // first-time fallback
+          const fallback = sampleMenu.sections.map((s) => ({
+            ...s,
+            groups: s.groups || [],
+            items: s.items || [],
+          }));
           setRestaurantName(sampleMenu.restaurantName);
-          setSections(sampleMenu.sections);
+          setSections(fallback);
         }
       } catch (err) {
         console.error(err);
+        const fallback = sampleMenu.sections.map((s) => ({
+          ...s,
+          groups: s.groups || [],
+          items: s.items || [],
+        }));
         setRestaurantName(sampleMenu.restaurantName);
-        setSections(sampleMenu.sections);
+        setSections(fallback);
       }
     };
 
@@ -66,9 +93,12 @@ const UniversalMenuForm = () => {
   const addSection = () => {
     if (!newSectionName.trim()) return;
     const id = "section-" + Date.now();
-    setSections([...sections, { id, section: newSectionName, items: [] }]);
+    setSections([
+      ...sections,
+      { id, section: newSectionName, items: [], groups: [] },
+    ]);
     setNewSectionName("");
-    setAddingSection(false); // close form after save
+    setAddingSection(false);
   };
 
   const editSection = (id) => {
@@ -92,9 +122,8 @@ const UniversalMenuForm = () => {
     setSectionDraftName("");
   };
 
-  const deleteSection = (id) => {
+  const deleteSection = (id) =>
     setSections(sections.filter((s) => s.id !== id));
-  };
 
   const duplicateSection = (id) => {
     const sec = sections.find((s) => s.id === id);
@@ -102,13 +131,104 @@ const UniversalMenuForm = () => {
     const newId = "section-" + Date.now();
     setSections([
       ...sections,
-      { ...sec, id: newId, section: sec.section + " Copy" },
+      {
+        ...JSON.parse(JSON.stringify(sec)),
+        id: newId,
+        section: sec.section + " Copy",
+      },
     ]);
   };
 
+  // ------------------- Group Handlers -------------------
+  const startAddingGroup = (sectionId) => {
+    setAddingGroupSectionId(sectionId);
+    setGroupDraftName("");
+  };
+
+  const saveGroup = (sectionId) => {
+    if (!groupDraftName.trim()) return;
+    const newGroup = {
+      id: "group-" + Date.now(),
+      groupName: groupDraftName,
+      items: [],
+    };
+    setSections(
+      sections.map((s) =>
+        s.id === sectionId
+          ? { ...s, groups: [...(s.groups || []), newGroup] }
+          : s
+      )
+    );
+    setAddingGroupSectionId(null);
+    setGroupDraftName("");
+  };
+
+  const cancelAddGroup = () => {
+    setAddingGroupSectionId(null);
+    setGroupDraftName("");
+  };
+
+  const editGroup = (sectionId, groupId, currentName) =>
+    setEditingGroup({ sectionId, groupId, name: currentName });
+
+  const saveEditedGroup = () => {
+    const { sectionId, groupId, name } = editingGroup;
+    setSections(
+      sections.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              groups: s.groups.map((g) =>
+                g.id === groupId ? { ...g, groupName: name } : g
+              ),
+            }
+          : s
+      )
+    );
+    setEditingGroup({ sectionId: null, groupId: null, name: "" });
+  };
+
+  const cancelEditGroup = () =>
+    setEditingGroup({ sectionId: null, groupId: null, name: "" });
+
+  const deleteGroup = (sectionId, groupId) => {
+    setSections(
+      sections.map((s) =>
+        s.id === sectionId
+          ? { ...s, groups: s.groups.filter((g) => g.id !== groupId) }
+          : s
+      )
+    );
+  };
+
+  const duplicateGroup = (sectionId, groupId) => {
+    const sec = sections.find((s) => s.id === sectionId);
+    if (!sec) return;
+    const grp = sec.groups.find((g) => g.id === groupId);
+    if (!grp) return;
+    const newId = "group-" + Date.now();
+    setSections(
+      sections.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              groups: [
+                ...s.groups,
+                {
+                  ...JSON.parse(JSON.stringify(grp)),
+                  id: newId,
+                  groupName: grp.groupName + " Copy",
+                },
+              ],
+            }
+          : s
+      )
+    );
+  };
+
   // ------------------- Dish Handlers -------------------
-  const startAddingDish = (sectionId) => {
-    setAddingDishSectionId(sectionId);
+  const startAddingDish = (sectionId, groupId = null) => {
+    setAddingDishSectionId({ sectionId, groupId });
     setDishDraft({
       name: "",
       description: "",
@@ -120,7 +240,7 @@ const UniversalMenuForm = () => {
     });
   };
 
-  const saveDish = (sectionId) => {
+  const saveDish = (sectionId, groupId = null) => {
     const newDish = {
       id: "dish-" + Date.now(),
       name: dishDraft.name,
@@ -131,12 +251,33 @@ const UniversalMenuForm = () => {
       visible: dishDraft.visible,
       modifiers: dishDraft.modifiers,
     };
+
     setSections(
-      sections.map((s) =>
-        s.id === sectionId ? { ...s, items: [...s.items, newDish] } : s
-      )
+      sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        if (groupId) {
+          return {
+            ...s,
+            groups: s.groups.map((g) =>
+              g.id === groupId ? { ...g, items: [...g.items, newDish] } : g
+            ),
+          };
+        } else {
+          return { ...s, items: [...s.items, newDish] };
+        }
+      })
     );
+
     setAddingDishSectionId(null);
+    setDishDraft({
+      name: "",
+      description: "",
+      price: "",
+      image: "",
+      available: true,
+      visible: true,
+      modifiers: [],
+    });
   };
 
   const cancelAddDish = () => {
@@ -152,62 +293,194 @@ const UniversalMenuForm = () => {
     });
   };
 
-  const editDish = (sectionId, dish) => {
-    setEditingDish({ sectionId, dishId: dish.id, draft: { ...dish } });
+  const editDish = (sectionId, dish, groupId = null) => {
+    // set editingDish; include moveTarget default to current location
+    setEditingDish({
+      sectionId,
+      groupId,
+      dishId: dish.id,
+      draft: { ...dish },
+      moveTarget: groupId ?? "section",
+    });
   };
 
   const saveEditedDish = () => {
-    const { sectionId, dishId, draft } = editingDish;
+    const { sectionId, groupId, dishId, draft } = editingDish;
     setSections(
-      sections.map((s) =>
-        s.id === sectionId
-          ? {
-              ...s,
-              items: s.items.map((d) =>
-                d.id === dishId
-                  ? { ...d, ...draft, image: draft.image || d.image } // ✅ keep old image if none uploaded
-                  : d
-              ),
-            }
-          : s
-      )
+      sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        if (groupId) {
+          return {
+            ...s,
+            groups: s.groups.map((g) =>
+              g.id === groupId
+                ? {
+                    ...g,
+                    items: g.items.map((d) =>
+                      d.id === dishId
+                        ? { ...d, ...draft, image: draft.image || d.image }
+                        : d
+                    ),
+                  }
+                : g
+            ),
+          };
+        } else {
+          return {
+            ...s,
+            items: s.items.map((d) =>
+              d.id === dishId
+                ? { ...d, ...draft, image: draft.image || d.image }
+                : d
+            ),
+          };
+        }
+      })
     );
-    setEditingDish({ sectionId: null, dishId: null, draft: {} });
+    setEditingDish({
+      sectionId: null,
+      groupId: null,
+      dishId: null,
+      draft: {},
+      moveTarget: "",
+    });
   };
 
-  const cancelEditDish = () => {
-    setEditingDish({ sectionId: null, dishId: null, draft: {} });
-  };
+  const cancelEditDish = () =>
+    setEditingDish({
+      sectionId: null,
+      groupId: null,
+      dishId: null,
+      draft: {},
+      moveTarget: "",
+    });
 
-  const deleteDish = (sectionId, dishId) => {
+  const deleteDish = (sectionId, dishId, groupId = null) => {
     setSections(
-      sections.map((s) =>
-        s.id === sectionId
-          ? { ...s, items: s.items.filter((d) => d.id !== dishId) }
-          : s
-      )
+      sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        if (groupId) {
+          return {
+            ...s,
+            groups: s.groups.map((g) =>
+              g.id === groupId
+                ? { ...g, items: g.items.filter((d) => d.id !== dishId) }
+                : g
+            ),
+          };
+        } else {
+          return { ...s, items: s.items.filter((d) => d.id !== dishId) };
+        }
+      })
     );
   };
 
-  const duplicateDish = (sectionId, dishId) => {
+  const duplicateDish = (sectionId, dishId, groupId = null) => {
     const sec = sections.find((s) => s.id === sectionId);
     if (!sec) return;
-    const dish = sec.items.find((d) => d.id === dishId);
+    let dish;
+    if (groupId) {
+      const grp = sec.groups.find((g) => g.id === groupId);
+      dish = grp?.items.find((d) => d.id === dishId);
+    } else {
+      dish = sec.items.find((d) => d.id === dishId);
+    }
     if (!dish) return;
     const newId = "dish-" + Date.now();
     setSections(
-      sections.map((s) =>
-        s.id === sectionId
-          ? {
-              ...s,
-              items: [
-                ...s.items,
-                { ...dish, id: newId, name: dish.name + " Copy" },
-              ],
-            }
-          : s
-      )
+      sections.map((s) => {
+        if (s.id !== sectionId) return s;
+        if (groupId) {
+          return {
+            ...s,
+            groups: s.groups.map((g) =>
+              g.id === groupId
+                ? {
+                    ...g,
+                    items: [
+                      ...g.items,
+                      { ...dish, id: newId, name: dish.name + " Copy" },
+                    ],
+                  }
+                : g
+            ),
+          };
+        } else {
+          return {
+            ...s,
+            items: [
+              ...s.items,
+              { ...dish, id: newId, name: dish.name + " Copy" },
+            ],
+          };
+        }
+      })
     );
+  };
+
+  // Move dish (works for section -> group, group -> section, group -> group)
+  const moveDishToGroup = (sectionId, dishId, targetGroupIdOrSection) => {
+    // targetGroupIdOrSection: "section" -> ungrouped (section.items), or groupId string
+    setSections(
+      sections.map((s) => {
+        if (s.id !== sectionId) return s;
+
+        // find if dish exists in section items
+        let dish = s.items.find((d) => d.id === dishId);
+        let source = "section";
+        let updatedItems = s.items;
+        let updatedGroups = s.groups
+          ? [...s.groups.map((g) => ({ ...g, items: [...g.items] }))]
+          : [];
+
+        if (!dish) {
+          // find in groups
+          for (let i = 0; i < updatedGroups.length; i++) {
+            const g = updatedGroups[i];
+            const found = g.items.find((d) => d.id === dishId);
+            if (found) {
+              dish = found;
+              source = g.id;
+              // remove from that group's items
+              updatedGroups[i] = {
+                ...g,
+                items: g.items.filter((d) => d.id !== dishId),
+              };
+              break;
+            }
+          }
+        } else {
+          // dish was in section items: remove it
+          updatedItems = updatedItems.filter((d) => d.id !== dishId);
+        }
+
+        if (!dish) return s; // nothing to move
+
+        if (targetGroupIdOrSection === "section") {
+          // move to section items
+          updatedItems = [...updatedItems, dish];
+        } else {
+          // move into target group
+          updatedGroups = updatedGroups.map((g) =>
+            g.id === targetGroupIdOrSection
+              ? { ...g, items: [...g.items, dish] }
+              : g
+          );
+        }
+
+        return { ...s, items: updatedItems, groups: updatedGroups };
+      })
+    );
+
+    // Update editingDish to reflect new location if currently editing this dish
+    if (editingDish.dishId === dishId && editingDish.sectionId === sectionId) {
+      setEditingDish((prev) => ({
+        ...prev,
+        groupId:
+          targetGroupIdOrSection === "section" ? null : targetGroupIdOrSection,
+        moveTarget: targetGroupIdOrSection,
+      }));
+    }
   };
 
   const handleImageChange = async (e, mode = "add") => {
@@ -233,13 +506,11 @@ const UniversalMenuForm = () => {
       const data = await res.json();
 
       if (mode === "edit") {
-        // ✅ update the editing dish draft
         setEditingDish((prev) => ({
           ...prev,
           draft: { ...prev.draft, image: data.url },
         }));
       } else {
-        // ✅ update the add-dish draft
         setDishDraft((prev) => ({ ...prev, image: data.url }));
       }
     } catch (err) {
@@ -254,20 +525,14 @@ const UniversalMenuForm = () => {
 
   // ------------------- API Save Handler -------------------
   const saveMenuToServer = async () => {
-    const menuData = {
-      restaurantName,
-      sections,
-    };
-
+    const menuData = { restaurantName, sections };
     try {
       const response = await fetch(`${BACKEND_URL}/api/${client}/menu`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(menuData),
       });
-
       if (!response.ok) throw new Error("Failed to save menu");
-
       const result = await response.json();
       alert("✅ Menu saved successfully!");
       console.log("Server response:", result);
@@ -277,8 +542,158 @@ const UniversalMenuForm = () => {
     }
   };
 
+  // ------------------- Render helpers (keeps inline UI identical) -------------------
+  const renderDishEditor = (
+    dDraft,
+    onChangeDraft,
+    onSave,
+    onCancel,
+    sectionId,
+    currentGroupId
+  ) => {
+    // this editor includes the move-to-group control inside the edit panel
+    const section = sections.find((s) => s.id === sectionId);
+    const groupsForSection = section ? section.groups || [] : [];
+
+    return (
+      <>
+        <input
+          type="text"
+          placeholder="Dish Name"
+          value={dDraft.name || ""}
+          onChange={(e) => onChangeDraft({ ...dDraft, name: e.target.value })}
+          style={{ marginRight: "0.25rem" }}
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          value={dDraft.price || ""}
+          onChange={(e) => onChangeDraft({ ...dDraft, price: e.target.value })}
+          style={{ marginRight: "0.25rem" }}
+        />
+        <input
+          type="text"
+          placeholder="Description"
+          value={dDraft.description || ""}
+          onChange={(e) =>
+            onChangeDraft({ ...dDraft, description: e.target.value })
+          }
+          style={{ marginRight: "0.25rem" }}
+        />
+        <label>
+          <input
+            type="checkbox"
+            checked={dDraft.available ?? true}
+            onChange={(e) =>
+              onChangeDraft({ ...dDraft, available: e.target.checked })
+            }
+          />
+          Available
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={dDraft.visible ?? true}
+            onChange={(e) =>
+              onChangeDraft({ ...dDraft, visible: e.target.checked })
+            }
+          />
+          Visible
+        </label>
+        <input type="file" onChange={(e) => handleImageChange(e, "add")} />
+        <button onClick={onSave}>Save</button>
+        <button onClick={onCancel}>Cancel</button>
+
+        {/* Move-to-group control: user asked to have move option inside edit */}
+        <div style={{ marginTop: "0.5rem" }}>
+          <label style={{ marginRight: "0.5rem", fontWeight: "bold" }}>
+            Move to:
+          </label>
+          <select
+            value={editingDish.moveTarget || (currentGroupId ?? "section")}
+            onChange={(e) => {
+              const val = e.target.value;
+              // update transient selection
+              setEditingDish((prev) => ({ ...prev, moveTarget: val }));
+            }}
+            style={{ marginRight: "0.5rem" }}
+          >
+            <option value="section">Keep / Move to section (ungrouped)</option>
+            {groupsForSection.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.groupName}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              const target =
+                editingDish.moveTarget || (currentGroupId ?? "section");
+              // perform move
+              if (target === "section") {
+                moveDishToGroup(sectionId, editingDish.dishId, "section");
+              } else {
+                moveDishToGroup(sectionId, editingDish.dishId, target);
+              }
+            }}
+          >
+            Move
+          </button>
+        </div>
+
+        {/* Modifiers editor */}
+        <div style={{ marginTop: "0.5rem" }}>
+          <strong>Modifiers:</strong>
+          {(dDraft.modifiers || []).map((m, idx) => (
+            <div key={m.id || idx}>
+              <input
+                type="text"
+                value={m.name}
+                placeholder="Modifier name"
+                onChange={(e) => {
+                  const updated = (dDraft.modifiers || []).map((mod, i) =>
+                    i === idx ? { ...mod, name: e.target.value } : mod
+                  );
+                  onChangeDraft({ ...dDraft, modifiers: updated });
+                }}
+              />
+              <input
+                type="number"
+                step="0.01"
+                value={m.price}
+                placeholder="Price"
+                onChange={(e) => {
+                  const updated = (dDraft.modifiers || []).map((mod, i) =>
+                    i === idx
+                      ? { ...mod, price: parseFloat(e.target.value) }
+                      : mod
+                  );
+                  onChangeDraft({ ...dDraft, modifiers: updated });
+                }}
+                style={{ width: "80px", marginLeft: "0.25rem" }}
+              />
+            </div>
+          ))}
+          <button
+            onClick={() =>
+              onChangeDraft({
+                ...dDraft,
+                modifiers: [
+                  ...(dDraft.modifiers || []),
+                  { id: Date.now().toString(), name: "", price: 0 },
+                ],
+              })
+            }
+          >
+            + Add Modifier
+          </button>
+        </div>
+      </>
+    );
+  };
+
   return (
-    <div style={{ padding: "1rem", maxWidth: "800px", margin: "0 auto" }}>
+    <div style={{ padding: "1rem", maxWidth: "880px", margin: "0 auto" }}>
       <h2>Owner View – Build Your Menu</h2>
 
       {/* Restaurant Name */}
@@ -359,249 +774,217 @@ const UniversalMenuForm = () => {
                 >
                   ➕ Add item
                 </button>
+                <button
+                  style={{ marginLeft: "0.25rem" }}
+                  onClick={() => startAddingGroup(s.id)}
+                >
+                  ➕ Create Group
+                </button>
               </>
             )}
 
-            {/* Add Dish Form */}
-            {addingDishSectionId === s.id && (
+            {/* Add Dish Form (section-level) */}
+            {addingDishSectionId &&
+              addingDishSectionId.sectionId === s.id &&
+              addingDishSectionId.groupId == null && (
+                <div
+                  style={{
+                    marginTop: "0.5rem",
+                    borderTop: "1px dashed #ccc",
+                    paddingTop: "0.5rem",
+                  }}
+                >
+                  {renderDishEditor(
+                    dishDraft,
+                    (newDraft) => setDishDraft(newDraft),
+                    () => saveDish(s.id, null),
+                    cancelAddDish,
+                    s.id,
+                    null
+                  )}
+                </div>
+              )}
+
+            {/* Groups */}
+            {s.groups?.map((g) => (
               <div
+                key={g.id}
                 style={{
+                  marginLeft: "1rem",
+                  borderLeft: "2px dashed #aaa",
+                  paddingLeft: "1rem",
                   marginTop: "0.5rem",
-                  borderTop: "1px dashed #ccc",
-                  paddingTop: "0.5rem",
                 }}
               >
-                <input
-                  type="text"
-                  placeholder="Dish Name"
-                  value={dishDraft.name}
-                  onChange={(e) =>
-                    setDishDraft({ ...dishDraft, name: e.target.value })
-                  }
-                  style={{ marginRight: "0.25rem" }}
-                />
-                <input
-                  type="number"
-                  placeholder="Price"
-                  value={dishDraft.price}
-                  onChange={(e) =>
-                    setDishDraft({ ...dishDraft, price: e.target.value })
-                  }
-                  style={{ marginRight: "0.25rem" }}
-                />
-                <input
-                  type="text"
-                  placeholder="Description"
-                  value={dishDraft.description}
-                  onChange={(e) =>
-                    setDishDraft({ ...dishDraft, description: e.target.value })
-                  }
-                  style={{ marginRight: "0.25rem" }}
-                />
-                <input
-                  type="text"
-                  placeholder="Description"
-                  value={dishDraft.description}
-                  onChange={(e) =>
-                    setDishDraft({ ...dishDraft, description: e.target.value })
-                  }
-                />
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={dishDraft.available}
-                    onChange={(e) =>
-                      setDishDraft({
-                        ...dishDraft,
-                        available: e.target.checked,
-                      })
-                    }
-                  />
-                  Available
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={dishDraft.visible}
-                    onChange={(e) =>
-                      setDishDraft({ ...dishDraft, visible: e.target.checked })
-                    }
-                  />
-                  Visible
-                </label>
-                <input
-                  type="file"
-                  onChange={(e) => handleImageChange(e, "add")}
-                />
-                <button onClick={() => saveDish(s.id)}>Save</button>
-                <button onClick={cancelAddDish}>Cancel</button>
-              </div>
-            )}
+                {editingGroup.groupId === g.id &&
+                editingGroup.sectionId === s.id ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editingGroup.name}
+                      onChange={(e) =>
+                        setEditingGroup({
+                          ...editingGroup,
+                          name: e.target.value,
+                        })
+                      }
+                      style={{ marginRight: "0.5rem" }}
+                    />
+                    <button onClick={saveEditedGroup}>Save</button>
+                    <button onClick={cancelEditGroup}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <strong>{g.groupName}</strong>
+                    <button
+                      style={{ marginLeft: "0.5rem" }}
+                      onClick={() => editGroup(s.id, g.id, g.groupName)}
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      style={{ marginLeft: "0.25rem" }}
+                      onClick={() => deleteGroup(s.id, g.id)}
+                    >
+                      ❌
+                    </button>
+                    <button
+                      style={{ marginLeft: "0.25rem" }}
+                      onClick={() => duplicateGroup(s.id, g.id)}
+                    >
+                      📑
+                    </button>
+                    <button
+                      style={{ marginLeft: "0.25rem" }}
+                      onClick={() => startAddingDish(s.id, g.id)}
+                    >
+                      ➕ Add item
+                    </button>
+                  </>
+                )}
 
-            {/* Dishes */}
+                {/* Add Dish Form (group-level) */}
+                {addingDishSectionId &&
+                  addingDishSectionId.sectionId === s.id &&
+                  addingDishSectionId.groupId === g.id && (
+                    <div
+                      style={{
+                        marginTop: "0.5rem",
+                        borderTop: "1px dashed #ccc",
+                        paddingTop: "0.5rem",
+                      }}
+                    >
+                      {renderDishEditor(
+                        dishDraft,
+                        (newDraft) => setDishDraft(newDraft),
+                        () => saveDish(s.id, g.id),
+                        cancelAddDish,
+                        s.id,
+                        g.id
+                      )}
+                    </div>
+                  )}
+
+                <ul>
+                  {g.items.map((d) => (
+                    <li key={d.id} style={{ marginTop: "0.25rem" }}>
+                      {editingDish.dishId === d.id &&
+                      editingDish.sectionId === s.id &&
+                      editingDish.groupId === g.id ? (
+                        // Edit view for grouped item (includes move control)
+                        <>
+                          {renderDishEditor(
+                            editingDish.draft,
+                            (newDraft) =>
+                              setEditingDish({
+                                ...editingDish,
+                                draft: newDraft,
+                              }),
+                            saveEditedDish,
+                            cancelEditDish,
+                            s.id,
+                            g.id
+                          )}
+                        </>
+                      ) : (
+                        // Display view for grouped item (full controls shown)
+                        <>
+                          <strong>{d.name}</strong> - $
+                          {Number(d.price || 0).toFixed(2)}
+                          {!d.available && (
+                            <span style={{ color: "red" }}> (86’d)</span>
+                          )}
+                          {!d.visible && (
+                            <span style={{ color: "gray" }}> (Hidden)</span>
+                          )}
+                          <br />
+                          <em>{d.description}</em>
+                          <br />
+                          {d.image && (
+                            <img
+                              src={d.image}
+                              alt={d.name}
+                              style={{ width: "100px", borderRadius: "4px" }}
+                            />
+                          )}
+                          {d.modifiers?.length > 0 && (
+                            <ul style={{ marginTop: "0.5rem" }}>
+                              {d.modifiers.map((m) => (
+                                <li key={m.id}>
+                                  {m.name}{" "}
+                                  {m.price > 0 &&
+                                    `(+${Number(m.price || 0).toFixed(2)})`}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          <button
+                            style={{ marginLeft: "0.25rem" }}
+                            onClick={() => editDish(s.id, d, g.id)}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            style={{ marginLeft: "0.25rem" }}
+                            onClick={() => deleteDish(s.id, d.id, g.id)}
+                          >
+                            ❌
+                          </button>
+                          <button
+                            style={{ marginLeft: "0.25rem" }}
+                            onClick={() => duplicateDish(s.id, d.id, g.id)}
+                          >
+                            📑
+                          </button>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            {/* Ungrouped Items */}
             <ul>
               {s.items.map((d) => (
                 <li key={d.id} style={{ marginTop: "0.25rem" }}>
-                  {editingDish.dishId === d.id ? (
+                  {editingDish.dishId === d.id &&
+                  editingDish.sectionId === s.id &&
+                  !editingDish.groupId ? (
+                    // Edit view for ungrouped item (includes move control)
                     <>
-                      <input
-                        type="text"
-                        value={editingDish.draft.name}
-                        onChange={(e) =>
-                          setEditingDish({
-                            ...editingDish,
-                            draft: {
-                              ...editingDish.draft,
-                              name: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                      <input
-                        type="number"
-                        value={editingDish.draft.price}
-                        onChange={(e) =>
-                          setEditingDish({
-                            ...editingDish,
-                            draft: {
-                              ...editingDish.draft,
-                              price: parseFloat(e.target.value),
-                            },
-                          })
-                        }
-                        style={{ width: "70px", marginLeft: "0.25rem" }}
-                      />
-                      <input
-                        type="text"
-                        value={editingDish.draft.description}
-                        onChange={(e) =>
-                          setEditingDish({
-                            ...editingDish,
-                            draft: {
-                              ...editingDish.draft,
-                              description: e.target.value,
-                            },
-                          })
-                        }
-                        style={{ marginLeft: "0.25rem" }}
-                      />
-
-                      {/* ✅ Toggles */}
-                      <label style={{ marginLeft: "0.5rem" }}>
-                        <input
-                          type="checkbox"
-                          checked={editingDish.draft.available}
-                          onChange={(e) =>
-                            setEditingDish({
-                              ...editingDish,
-                              draft: {
-                                ...editingDish.draft,
-                                available: e.target.checked,
-                              },
-                            })
-                          }
-                        />{" "}
-                        Available
-                      </label>
-                      <label style={{ marginLeft: "0.5rem" }}>
-                        <input
-                          type="checkbox"
-                          checked={editingDish.draft.visible}
-                          onChange={(e) =>
-                            setEditingDish({
-                              ...editingDish,
-                              draft: {
-                                ...editingDish.draft,
-                                visible: e.target.checked,
-                              },
-                            })
-                          }
-                        />{" "}
-                        Visible
-                      </label>
-
-                      <input
-                        type="file"
-                        onChange={(e) => handleImageChange(e, "edit")}
-                      />
-                      <button onClick={saveEditedDish}>Save</button>
-                      <button onClick={cancelEditDish}>Cancel</button>
-
-                      {/* ✅ Modifier Editing */}
-                      <div style={{ marginTop: "0.5rem" }}>
-                        <strong>Modifiers:</strong>
-                        {editingDish.draft.modifiers?.map((m, idx) => (
-                          <div key={m.id || idx}>
-                            <input
-                              type="text"
-                              value={m.name}
-                              placeholder="Modifier name"
-                              onChange={(e) => {
-                                const updatedMods =
-                                  editingDish.draft.modifiers.map((mod, i) =>
-                                    i === idx
-                                      ? { ...mod, name: e.target.value }
-                                      : mod
-                                  );
-                                setEditingDish({
-                                  ...editingDish,
-                                  draft: {
-                                    ...editingDish.draft,
-                                    modifiers: updatedMods,
-                                  },
-                                });
-                              }}
-                            />
-                            <input
-                              type="number"
-                              step="0.01"
-                              value={m.price}
-                              placeholder="Price"
-                              onChange={(e) => {
-                                const updatedMods =
-                                  editingDish.draft.modifiers.map((mod, i) =>
-                                    i === idx
-                                      ? {
-                                          ...mod,
-                                          price: parseFloat(e.target.value),
-                                        }
-                                      : mod
-                                  );
-                                setEditingDish({
-                                  ...editingDish,
-                                  draft: {
-                                    ...editingDish.draft,
-                                    modifiers: updatedMods,
-                                  },
-                                });
-                              }}
-                              style={{ width: "80px", marginLeft: "0.25rem" }}
-                            />
-                          </div>
-                        ))}
-                        <button
-                          onClick={() =>
-                            setEditingDish({
-                              ...editingDish,
-                              draft: {
-                                ...editingDish.draft,
-                                modifiers: [
-                                  ...(editingDish.draft.modifiers || []),
-                                  {
-                                    id: Date.now().toString(),
-                                    name: "",
-                                    price: 0,
-                                  },
-                                ],
-                              },
-                            })
-                          }
-                        >
-                          + Add Modifier
-                        </button>
-                      </div>
+                      {renderDishEditor(
+                        editingDish.draft,
+                        (newDraft) =>
+                          setEditingDish({ ...editingDish, draft: newDraft }),
+                        saveEditedDish,
+                        cancelEditDish,
+                        s.id,
+                        null
+                      )}
                     </>
                   ) : (
+                    // Display view for ungrouped item
                     <>
                       <strong>{d.name}</strong> - $
                       {Number(d.price || 0).toFixed(2)}
@@ -621,7 +1004,6 @@ const UniversalMenuForm = () => {
                           style={{ width: "100px", borderRadius: "4px" }}
                         />
                       )}
-                      {/* Show modifiers in view mode */}
                       {d.modifiers?.length > 0 && (
                         <ul style={{ marginTop: "0.5rem" }}>
                           {d.modifiers.map((m) => (
@@ -656,6 +1038,26 @@ const UniversalMenuForm = () => {
                 </li>
               ))}
             </ul>
+
+            {/* Add Group Form */}
+            {addingGroupSectionId === s.id && (
+              <div style={{ marginTop: "0.5rem" }}>
+                <input
+                  type="text"
+                  placeholder="Group Name"
+                  value={groupDraftName}
+                  onChange={(e) => setGroupDraftName(e.target.value)}
+                  style={{ marginRight: "0.5rem" }}
+                />
+                <button onClick={() => saveGroup(s.id)}>Save</button>
+                <button
+                  onClick={cancelAddGroup}
+                  style={{ marginLeft: "0.5rem" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         ))}
 

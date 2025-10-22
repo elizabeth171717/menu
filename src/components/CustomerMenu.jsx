@@ -28,13 +28,9 @@ export default function CustomerMenu() {
     fetchMenu();
   }, []);
 
-  if (loading) {
-    return <p style={{ textAlign: "center" }}>Loading menu...</p>;
-  }
-
-  if (!menu || !menu.sections) {
+  if (loading) return <p style={{ textAlign: "center" }}>Loading menu...</p>;
+  if (!menu || !menu.sections)
     return <p style={{ textAlign: "center" }}>No menu available</p>;
-  }
 
   return (
     <div style={{ marginTop: "2rem", padding: "1rem" }}>
@@ -45,11 +41,10 @@ export default function CustomerMenu() {
 
       {/* Sections */}
       {menu.sections.map((section) => {
-        const visibleItems = (section.items || []).filter(
-          (item) => item.visible !== false // 👈 still hide if "hidden"
+        // Filter visible ungrouped items
+        const visibleUngroupedItems = (section.items || []).filter(
+          (item) => item.visible !== false
         );
-
-        if (visibleItems.length === 0) return null;
 
         return (
           <div key={section.id || section._id} style={{ marginBottom: "3rem" }}>
@@ -65,74 +60,173 @@ export default function CustomerMenu() {
               {section.section}
             </h2>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
-              {visibleItems.map((item) => (
-                <div
-                  key={item.id || item._id}
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "1rem",
-                    borderRadius: "10px",
-                    textAlign: "center",
-                    opacity: item.available ? 1 : 0.6, // dim unavailable items
-                  }}
-                >
-                  {/* Dish image */}
-                  {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
+            {/* Render groups first */}
+            {section.groups &&
+              section.groups.length > 0 &&
+              section.groups.map((group) => {
+                const visibleGroupItems = (group.items || []).filter(
+                  (item) => item.visible !== false
+                );
+                if (visibleGroupItems.length === 0) return null;
+
+                return (
+                  <div
+                    key={group.id || group._id}
+                    style={{ marginBottom: "2rem" }}
+                  >
+                    <h3
                       style={{
-                        width: "100%",
-                        height: "150px",
-                        objectFit: "cover",
-                        borderRadius: "8px",
-                        marginBottom: "0.8rem",
+                        fontSize: "1.2rem",
+                        fontWeight: "bold",
+                        marginBottom: "0.5rem",
+                        textTransform: "capitalize",
                       }}
-                    />
-                  )}
-
-                  <h3 style={{ marginBottom: "0.5rem" }}>{item.name}</h3>
-                  <p style={{ marginBottom: "0.5rem" }}>{item.description}</p>
-
-                  <p style={{ fontWeight: "bold" }}>
-                    ${Number(item.price || 0).toFixed(2)}
-                  </p>
-
-                  {/* 👇 If unavailable, show message */}
-                  {!item.available && (
-                    <p style={{ color: "red", fontWeight: "bold" }}>
-                      ❌ Unavailable
-                    </p>
-                  )}
-
-                  {/* Modifiers */}
-                  {item.modifiers && item.modifiers.length > 0 && (
-                    <div style={{ marginTop: "0.5rem", textAlign: "left" }}>
-                      <p style={{ fontWeight: "bold", marginBottom: "0.3rem" }}>
-                        Options:
-                      </p>
-                      <ul style={{ paddingLeft: "1rem", margin: 0 }}>
-                        {item.modifiers.map((mod) => (
-                          <li key={mod.id}>
-                            {mod.name}
-
-                            {mod.price > 0 &&
-                              ` ($${Number(mod.price || 0).toFixed(2)})`}
-                          </li>
-                        ))}
-                      </ul>
+                    >
+                      {group.groupName}
+                    </h3>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fill, minmax(220px, 1fr))",
+                        gap: "1.5rem",
+                      }}
+                    >
+                      {visibleGroupItems.map((item) => (
+                        <div
+                          key={item.id || item._id}
+                          style={{
+                            border: "1px solid #ccc",
+                            padding: "1rem",
+                            borderRadius: "10px",
+                            textAlign: "center",
+                            opacity: item.available ? 1 : 0.6,
+                          }}
+                        >
+                          {item.image && (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              style={{
+                                width: "100%",
+                                height: "150px",
+                                objectFit: "cover",
+                                borderRadius: "8px",
+                                marginBottom: "0.8rem",
+                              }}
+                            />
+                          )}
+                          <h3 style={{ marginBottom: "0.5rem" }}>
+                            {item.name}
+                          </h3>
+                          <p style={{ marginBottom: "0.5rem" }}>
+                            {item.description}
+                          </p>
+                          <p style={{ fontWeight: "bold" }}>
+                            ${Number(item.price || 0).toFixed(2)}
+                          </p>
+                          {!item.available && (
+                            <p style={{ color: "red", fontWeight: "bold" }}>
+                              ❌ Unavailable
+                            </p>
+                          )}
+                          {item.modifiers && item.modifiers.length > 0 && (
+                            <div
+                              style={{ marginTop: "0.5rem", textAlign: "left" }}
+                            >
+                              <p
+                                style={{
+                                  fontWeight: "bold",
+                                  marginBottom: "0.3rem",
+                                }}
+                              >
+                                Options:
+                              </p>
+                              <ul style={{ paddingLeft: "1rem", margin: 0 }}>
+                                {item.modifiers.map((mod) => (
+                                  <li key={mod.id}>
+                                    {mod.name}
+                                    {mod.price > 0 &&
+                                      ` ($${Number(mod.price || 0).toFixed(
+                                        2
+                                      )})`}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                  </div>
+                );
+              })}
+
+            {/* Render ungrouped items */}
+            {visibleUngroupedItems.length > 0 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                  gap: "1.5rem",
+                }}
+              >
+                {visibleUngroupedItems.map((item) => (
+                  <div
+                    key={item.id || item._id}
+                    style={{
+                      border: "1px solid #ccc",
+                      padding: "1rem",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                      opacity: item.available ? 1 : 0.6,
+                    }}
+                  >
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          width: "100%",
+                          height: "150px",
+                          objectFit: "cover",
+                          borderRadius: "8px",
+                          marginBottom: "0.8rem",
+                        }}
+                      />
+                    )}
+                    <h3 style={{ marginBottom: "0.5rem" }}>{item.name}</h3>
+                    <p style={{ marginBottom: "0.5rem" }}>{item.description}</p>
+                    <p style={{ fontWeight: "bold" }}>
+                      ${Number(item.price || 0).toFixed(2)}
+                    </p>
+                    {!item.available && (
+                      <p style={{ color: "red", fontWeight: "bold" }}>
+                        ❌ Unavailable
+                      </p>
+                    )}
+                    {item.modifiers && item.modifiers.length > 0 && (
+                      <div style={{ marginTop: "0.5rem", textAlign: "left" }}>
+                        <p
+                          style={{ fontWeight: "bold", marginBottom: "0.3rem" }}
+                        >
+                          Options:
+                        </p>
+                        <ul style={{ paddingLeft: "1rem", margin: 0 }}>
+                          {item.modifiers.map((mod) => (
+                            <li key={mod.id}>
+                              {mod.name}
+                              {mod.price > 0 &&
+                                ` ($${Number(mod.price || 0).toFixed(2)})`}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
