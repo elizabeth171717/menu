@@ -32,6 +32,7 @@ const UniversalMenuForm = () => {
     available: true,
     visible: true,
     modifiers: [],
+    customProperties: [],
   });
 
   const [addingGroupSectionId, setAddingGroupSectionId] = useState(null);
@@ -237,6 +238,7 @@ const UniversalMenuForm = () => {
       available: true,
       visible: true,
       modifiers: [],
+      customProperties: [],
     });
   };
 
@@ -250,6 +252,7 @@ const UniversalMenuForm = () => {
       available: dishDraft.available,
       visible: dishDraft.visible,
       modifiers: dishDraft.modifiers,
+      customProperties: dishDraft.customProperties,
     };
 
     setSections(
@@ -277,6 +280,7 @@ const UniversalMenuForm = () => {
       available: true,
       visible: true,
       modifiers: [],
+      customProperties: [],
     });
   };
 
@@ -290,6 +294,7 @@ const UniversalMenuForm = () => {
       available: true,
       visible: true,
       modifiers: [],
+      customProperties: [],
     });
   };
 
@@ -688,6 +693,53 @@ const UniversalMenuForm = () => {
             + Add Modifier
           </button>
         </div>
+
+        {/* Custom Properties editor */}
+        <div style={{ marginTop: "0.5rem" }}>
+          <strong>Custom Properties:</strong>
+          {(dDraft.customProperties || []).map((p, idx) => (
+            <div key={idx}>
+              <input
+                type="text"
+                value={p.key}
+                placeholder="Property name (e.g. Filling)"
+                onChange={(e) => {
+                  const updated = (dDraft.customProperties || []).map(
+                    (prop, i) =>
+                      i === idx ? { ...prop, key: e.target.value } : prop
+                  );
+                  onChangeDraft({ ...dDraft, customProperties: updated });
+                }}
+                style={{ marginRight: "0.25rem" }}
+              />
+              <input
+                type="text"
+                value={p.value}
+                placeholder="Value (e.g. Chicken)"
+                onChange={(e) => {
+                  const updated = (dDraft.customProperties || []).map(
+                    (prop, i) =>
+                      i === idx ? { ...prop, value: e.target.value } : prop
+                  );
+                  onChangeDraft({ ...dDraft, customProperties: updated });
+                }}
+              />
+            </div>
+          ))}
+          <button
+            onClick={() =>
+              onChangeDraft({
+                ...dDraft,
+                customProperties: [
+                  ...(dDraft.customProperties || []),
+                  { key: "", value: "" },
+                ],
+              })
+            }
+          >
+            + Add Property
+          </button>
+        </div>
       </>
     );
   };
@@ -938,6 +990,15 @@ const UniversalMenuForm = () => {
                               ))}
                             </ul>
                           )}
+                          {d.customProperties?.length > 0 && (
+                            <ul style={{ marginTop: "0.5rem" }}>
+                              {d.customProperties.map((p, idx) => (
+                                <li key={idx}>
+                                  <strong>{p.key}:</strong> {p.value}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                           <button
                             style={{ marginLeft: "0.25rem" }}
                             onClick={() => editDish(s.id, d, g.id)}
@@ -1011,6 +1072,15 @@ const UniversalMenuForm = () => {
                               {m.name}{" "}
                               {m.price > 0 &&
                                 `(+${Number(m.price || 0).toFixed(2)})`}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {d.customProperties?.length > 0 && (
+                        <ul style={{ marginTop: "0.5rem" }}>
+                          {d.customProperties.map((p, idx) => (
+                            <li key={idx}>
+                              <strong>{p.key}:</strong> {p.value}
                             </li>
                           ))}
                         </ul>

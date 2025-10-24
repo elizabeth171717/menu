@@ -130,6 +130,7 @@ export default function CustomerMenu() {
                               ❌ Unavailable
                             </p>
                           )}
+                          {/* Modifiers */}
                           {item.modifiers && item.modifiers.length > 0 && (
                             <div
                               style={{ marginTop: "0.5rem", textAlign: "left" }}
@@ -155,6 +156,33 @@ export default function CustomerMenu() {
                               </ul>
                             </div>
                           )}
+
+                          {/* Custom Properties */}
+                          {item.customProperties &&
+                            item.customProperties.length > 0 && (
+                              <div
+                                style={{
+                                  marginTop: "0.5rem",
+                                  textAlign: "left",
+                                }}
+                              >
+                                <p
+                                  style={{
+                                    fontWeight: "bold",
+                                    marginBottom: "0.3rem",
+                                  }}
+                                >
+                                  Details:
+                                </p>
+                                <ul style={{ paddingLeft: "1rem", margin: 0 }}>
+                                  {item.customProperties.map((prop, index) => (
+                                    <li key={index}>
+                                      <strong>{prop.key}:</strong> {prop.value}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                         </div>
                       ))}
                     </div>
@@ -223,6 +251,26 @@ export default function CustomerMenu() {
                         </ul>
                       </div>
                     )}
+                    {item.customProperties &&
+                      item.customProperties.length > 0 && (
+                        <div style={{ marginTop: "0.5rem", textAlign: "left" }}>
+                          <p
+                            style={{
+                              fontWeight: "bold",
+                              marginBottom: "0.3rem",
+                            }}
+                          >
+                            Details:
+                          </p>
+                          <ul style={{ paddingLeft: "1rem", margin: 0 }}>
+                            {item.customProperties.map((prop, index) => (
+                              <li key={index}>
+                                <strong>{prop.key}:</strong> {prop.value}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                 ))}
               </div>

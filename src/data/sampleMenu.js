@@ -18,6 +18,11 @@ export const sampleMenu = {
             { id: "m1", name: "Extra Sauce", price: 0.5 },
             { id: "m2", name: "Spicy", price: 0 },
           ],
+ customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
         {
           id: "ap2",
@@ -28,6 +33,12 @@ export const sampleMenu = {
           available: false,
           visible: true,
           modifiers: [],
+          
+ customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
         {
           id: "ap3",
@@ -38,6 +49,12 @@ export const sampleMenu = {
           available: true,
           visible: false,
           modifiers: [],
+          
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
       ],
     },
@@ -58,6 +75,12 @@ export const sampleMenu = {
             { id: "m3", name: "Add Rice", price: 2 },
             { id: "m4", name: "Extra Veggies", price: 1.5 },
           ],
+          
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
         {
           id: "mn2",
@@ -70,6 +93,12 @@ export const sampleMenu = {
           modifiers: [
             { id: "m5", name: "Gluten-Free Pasta", price: 1 },
           ],
+          
+customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
         {
           id: "mn3",
@@ -84,6 +113,12 @@ export const sampleMenu = {
             { id: "m7", name: "Extra Cheese", price: 1 },
             { id: "m8", name: "No Onions", price: 0 },
           ],
+          
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
       ],
     },
@@ -101,6 +136,12 @@ export const sampleMenu = {
           available: true,
           visible: true,
           modifiers: [],
+          
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
         {
           id: "ds2",
@@ -114,6 +155,12 @@ export const sampleMenu = {
             { id: "m9", name: "Strawberry Topping", price: 1 },
             { id: "m10", name: "Chocolate Syrup", price: 1 },
           ],
+          
+ customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
         {
           id: "ds3",
@@ -127,6 +174,12 @@ export const sampleMenu = {
             { id: "m11", name: "Add Sprinkles", price: 0.5 },
             { id: "m12", name: "Whipped Cream", price: 0.75 },
           ],
+          
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
       ],
     },
@@ -147,6 +200,12 @@ export const sampleMenu = {
               available: true,
               visible: true,
               modifiers: [],
+              
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
             },
             {
               id: "drA2",
@@ -157,6 +216,12 @@ export const sampleMenu = {
               available: true,
               visible: true,
               modifiers: [],
+              
+ customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
             },
           ],
         },
@@ -173,6 +238,12 @@ export const sampleMenu = {
               available: true,
               visible: true,
               modifiers: [],
+              
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
             },
             {
               id: "drF2",
@@ -183,6 +254,12 @@ export const sampleMenu = {
               available: true,
               visible: true,
               modifiers: [],
+              
+  customProperties: [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
             },
           ],
         },
@@ -200,6 +277,12 @@ export const sampleMenu = {
             { id: "m13", name: "Add Milk", price: 0.5 },
             { id: "m14", name: "Extra Shot", price: 1 },
           ],
+          
+ customProperties : [  // ✅ this is the dynamic part
+    { key: "Filling", value: "Chicken" },
+    { key: "Wrapper", value: "Corn Husk" },
+    { key: "Sauce", value: "Green" },
+  ]
         },
       ],
     },
