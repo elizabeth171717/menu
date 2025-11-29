@@ -605,9 +605,8 @@ const UniversalMenuForm = () => {
           />
           Visible
         </label>
-        <input type="file" onChange={(e) => handleImageChange(e, "add")} />
-        <button onClick={onSave}>Save</button>
-        <button onClick={onCancel}>Cancel</button>
+
+        <input type="file" onChange={(e) => handleImageChange(e, "edit")} />
 
         {/* Move-to-group control: user asked to have move option inside edit */}
         <div style={{ marginTop: "0.5rem" }}>
@@ -740,6 +739,9 @@ const UniversalMenuForm = () => {
             + Add Property
           </button>
         </div>
+
+        <button onClick={onSave}>Save</button>
+        <button onClick={onCancel}>Cancel</button>
       </>
     );
   };
