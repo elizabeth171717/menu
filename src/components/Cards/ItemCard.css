@@ -1,0 +1,100 @@
+.dish-card {
+  background: #fcfcfc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.75rem 0;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dish-header {
+  display: flex;
+  
+  align-items: center;
+}
+
+.dish-title {
+  display: flex;
+  gap: 0.5rem;
+ padding: 0 0.75rem;
+}
+
+.dish-price {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.dish-actions {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.dish-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.dish-actions button:hover {
+  opacity: 0.7;
+}
+
+.dish-description {
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+   padding: 0 0.75rem;
+  color: #4b5563;
+}
+
+.dish-image {
+  width: 100%;        /* full width of the card */
+  height: 160px;      /* fixed height, or use 'auto' if you want natural ratio */
+  object-fit: cover;  /* crops/fills the space without stretching */
+ 
+  margin-top: 0.4rem;
+}
+
+
+.dish-modifiers {
+  margin-top: 0.5rem;
+  padding-left: 1rem;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+.dish-modifiers li {
+  margin-bottom: 0.15rem;
+}
+
+.modifier-price {
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+
+.dish-properties {
+  margin-top: 0.5rem;
+  padding-left: 1rem;
+  font-size: 0.8rem;
+}
+
+.dish-badge {
+  display: inline-block;
+  margin-top: 0.25rem;
+  margin-right: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.7rem;
+  border-radius: 6px;
+}
+
+.dish-badge.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.dish-badge.muted {
+  background: #e5e7eb;
+  color: #374151;
+}

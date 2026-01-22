@@ -1,7 +1,7 @@
 // src/components/UniversalMenuForm.jsx
 import React, { useState, useEffect } from "react";
 import { sampleMenu } from "../data/sampleMenu";
-
+import ItemCard from "./Cards/ItemCard";
 // Determine the backend URL based on the environment
 const BACKEND_URL =
   import.meta.env.MODE === "production"
@@ -111,8 +111,8 @@ const UniversalMenuForm = () => {
   const saveSection = (id) => {
     setSections(
       sections.map((s) =>
-        s.id === id ? { ...s, section: sectionDraftName } : s
-      )
+        s.id === id ? { ...s, section: sectionDraftName } : s,
+      ),
     );
     setEditingSectionId(null);
     setSectionDraftName("");
@@ -157,8 +157,8 @@ const UniversalMenuForm = () => {
       sections.map((s) =>
         s.id === sectionId
           ? { ...s, groups: [...(s.groups || []), newGroup] }
-          : s
-      )
+          : s,
+      ),
     );
     setAddingGroupSectionId(null);
     setGroupDraftName("");
@@ -180,11 +180,11 @@ const UniversalMenuForm = () => {
           ? {
               ...s,
               groups: s.groups.map((g) =>
-                g.id === groupId ? { ...g, groupName: name } : g
+                g.id === groupId ? { ...g, groupName: name } : g,
               ),
             }
-          : s
-      )
+          : s,
+      ),
     );
     setEditingGroup({ sectionId: null, groupId: null, name: "" });
   };
@@ -197,8 +197,8 @@ const UniversalMenuForm = () => {
       sections.map((s) =>
         s.id === sectionId
           ? { ...s, groups: s.groups.filter((g) => g.id !== groupId) }
-          : s
-      )
+          : s,
+      ),
     );
   };
 
@@ -222,8 +222,8 @@ const UniversalMenuForm = () => {
                 },
               ],
             }
-          : s
-      )
+          : s,
+      ),
     );
   };
 
@@ -262,13 +262,13 @@ const UniversalMenuForm = () => {
           return {
             ...s,
             groups: s.groups.map((g) =>
-              g.id === groupId ? { ...g, items: [...g.items, newDish] } : g
+              g.id === groupId ? { ...g, items: [...g.items, newDish] } : g,
             ),
           };
         } else {
           return { ...s, items: [...s.items, newDish] };
         }
-      })
+      }),
     );
 
     setAddingDishSectionId(null);
@@ -324,10 +324,10 @@ const UniversalMenuForm = () => {
                     items: g.items.map((d) =>
                       d.id === dishId
                         ? { ...d, ...draft, image: draft.image || d.image }
-                        : d
+                        : d,
                     ),
                   }
-                : g
+                : g,
             ),
           };
         } else {
@@ -336,11 +336,11 @@ const UniversalMenuForm = () => {
             items: s.items.map((d) =>
               d.id === dishId
                 ? { ...d, ...draft, image: draft.image || d.image }
-                : d
+                : d,
             ),
           };
         }
-      })
+      }),
     );
     setEditingDish({
       sectionId: null,
@@ -370,13 +370,13 @@ const UniversalMenuForm = () => {
             groups: s.groups.map((g) =>
               g.id === groupId
                 ? { ...g, items: g.items.filter((d) => d.id !== dishId) }
-                : g
+                : g,
             ),
           };
         } else {
           return { ...s, items: s.items.filter((d) => d.id !== dishId) };
         }
-      })
+      }),
     );
   };
 
@@ -407,7 +407,7 @@ const UniversalMenuForm = () => {
                       { ...dish, id: newId, name: dish.name + " Copy" },
                     ],
                   }
-                : g
+                : g,
             ),
           };
         } else {
@@ -419,7 +419,7 @@ const UniversalMenuForm = () => {
             ],
           };
         }
-      })
+      }),
     );
   };
 
@@ -469,12 +469,12 @@ const UniversalMenuForm = () => {
           updatedGroups = updatedGroups.map((g) =>
             g.id === targetGroupIdOrSection
               ? { ...g, items: [...g.items, dish] }
-              : g
+              : g,
           );
         }
 
         return { ...s, items: updatedItems, groups: updatedGroups };
-      })
+      }),
     );
 
     // Update editingDish to reflect new location if currently editing this dish
@@ -554,200 +554,209 @@ const UniversalMenuForm = () => {
     onSave,
     onCancel,
     sectionId,
-    currentGroupId
+    currentGroupId,
   ) => {
     // this editor includes the move-to-group control inside the edit panel
     const section = sections.find((s) => s.id === sectionId);
     const groupsForSection = section ? section.groups || [] : [];
 
     return (
-      <>
-        <input
-          type="text"
-          placeholder="Dish Name"
-          value={dDraft.name || ""}
-          onChange={(e) => onChangeDraft({ ...dDraft, name: e.target.value })}
-          style={{ marginRight: "0.25rem" }}
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          value={dDraft.price || ""}
-          onChange={(e) => onChangeDraft({ ...dDraft, price: e.target.value })}
-          style={{ marginRight: "0.25rem" }}
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          value={dDraft.description || ""}
-          onChange={(e) =>
-            onChangeDraft({ ...dDraft, description: e.target.value })
-          }
-          style={{ marginRight: "0.25rem" }}
-        />
-        <label>
-          <input
-            type="checkbox"
-            checked={dDraft.available ?? true}
-            onChange={(e) =>
-              onChangeDraft({ ...dDraft, available: e.target.checked })
-            }
-          />
-          Available
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={dDraft.visible ?? true}
-            onChange={(e) =>
-              onChangeDraft({ ...dDraft, visible: e.target.checked })
-            }
-          />
-          Visible
-        </label>
-
-        <input type="file" onChange={(e) => handleImageChange(e, "edit")} />
-
-        {/* Move-to-group control: user asked to have move option inside edit */}
-        <div style={{ marginTop: "0.5rem" }}>
-          <label style={{ marginRight: "0.5rem", fontWeight: "bold" }}>
-            Move to:
-          </label>
-          <select
-            value={editingDish.moveTarget || (currentGroupId ?? "section")}
-            onChange={(e) => {
-              const val = e.target.value;
-              // update transient selection
-              setEditingDish((prev) => ({ ...prev, moveTarget: val }));
-            }}
-            style={{ marginRight: "0.5rem" }}
-          >
-            <option value="section">Keep / Move to section (ungrouped)</option>
-            {groupsForSection.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.groupName}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => {
-              const target =
-                editingDish.moveTarget || (currentGroupId ?? "section");
-              // perform move
-              if (target === "section") {
-                moveDishToGroup(sectionId, editingDish.dishId, "section");
-              } else {
-                moveDishToGroup(sectionId, editingDish.dishId, target);
+      <div className="modal-overlay">
+        <div className="modal-card">
+          <label>
+            <input
+              type="checkbox"
+              checked={dDraft.available ?? true}
+              onChange={(e) =>
+                onChangeDraft({ ...dDraft, available: e.target.checked })
               }
-            }}
-          >
-            Move
-          </button>
-        </div>
-
-        {/* Modifiers editor */}
-        <div style={{ marginTop: "0.5rem" }}>
-          <strong>Modifiers:</strong>
-          {(dDraft.modifiers || []).map((m, idx) => (
-            <div key={m.id || idx}>
-              <input
-                type="text"
-                value={m.name}
-                placeholder="Modifier name"
-                onChange={(e) => {
-                  const updated = (dDraft.modifiers || []).map((mod, i) =>
-                    i === idx ? { ...mod, name: e.target.value } : mod
-                  );
-                  onChangeDraft({ ...dDraft, modifiers: updated });
-                }}
-              />
-              <input
-                type="number"
-                step="0.01"
-                value={m.price}
-                placeholder="Price"
-                onChange={(e) => {
-                  const updated = (dDraft.modifiers || []).map((mod, i) =>
-                    i === idx
-                      ? { ...mod, price: parseFloat(e.target.value) }
-                      : mod
-                  );
-                  onChangeDraft({ ...dDraft, modifiers: updated });
-                }}
-                style={{ width: "80px", marginLeft: "0.25rem" }}
-              />
-            </div>
-          ))}
-          <button
-            onClick={() =>
-              onChangeDraft({
-                ...dDraft,
-                modifiers: [
-                  ...(dDraft.modifiers || []),
-                  { id: Date.now().toString(), name: "", price: 0 },
-                ],
-              })
+              className="dish-input"
+            />
+            Available
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={dDraft.visible ?? true}
+              onChange={(e) =>
+                onChangeDraft({ ...dDraft, visible: e.target.checked })
+              }
+            />
+            Visible
+          </label>
+          <input
+            type="text"
+            placeholder="Dish Name"
+            value={dDraft.name || ""}
+            onChange={(e) => onChangeDraft({ ...dDraft, name: e.target.value })}
+          />
+          <input
+            type="number"
+            placeholder="Price"
+            value={dDraft.price || ""}
+            onChange={(e) =>
+              onChangeDraft({ ...dDraft, price: e.target.value })
             }
-          >
-            + Add Modifier
-          </button>
-        </div>
-
-        {/* Custom Properties editor */}
-        <div style={{ marginTop: "0.5rem" }}>
-          <strong>Custom Properties:</strong>
-          {(dDraft.customProperties || []).map((p, idx) => (
-            <div key={idx}>
-              <input
-                type="text"
-                value={p.key}
-                placeholder="Property name (e.g. Filling)"
-                onChange={(e) => {
-                  const updated = (dDraft.customProperties || []).map(
-                    (prop, i) =>
-                      i === idx ? { ...prop, key: e.target.value } : prop
-                  );
-                  onChangeDraft({ ...dDraft, customProperties: updated });
-                }}
-                style={{ marginRight: "0.25rem" }}
-              />
-              <input
-                type="text"
-                value={p.value}
-                placeholder="Value (e.g. Chicken)"
-                onChange={(e) => {
-                  const updated = (dDraft.customProperties || []).map(
-                    (prop, i) =>
-                      i === idx ? { ...prop, value: e.target.value } : prop
-                  );
-                  onChangeDraft({ ...dDraft, customProperties: updated });
-                }}
-              />
-            </div>
-          ))}
-          <button
-            onClick={() =>
-              onChangeDraft({
-                ...dDraft,
-                customProperties: [
-                  ...(dDraft.customProperties || []),
-                  { key: "", value: "" },
-                ],
-              })
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={dDraft.description || ""}
+            onChange={(e) =>
+              onChangeDraft({ ...dDraft, description: e.target.value })
             }
-          >
-            + Add Property
-          </button>
-        </div>
+          />
 
-        <button onClick={onSave}>Save</button>
-        <button onClick={onCancel}>Cancel</button>
-      </>
+          <input type="file" onChange={(e) => handleImageChange(e, "edit")} />
+
+          {/* Move-to-group control: user asked to have move option inside edit */}
+          <div style={{ marginTop: "0.5rem" }}>
+            <label style={{ marginRight: "0.5rem", fontWeight: "bold" }}>
+              Move to:
+            </label>
+            <select
+              value={editingDish.moveTarget || (currentGroupId ?? "section")}
+              onChange={(e) => {
+                const val = e.target.value;
+                // update transient selection
+                setEditingDish((prev) => ({ ...prev, moveTarget: val }));
+              }}
+              style={{ marginRight: "0.5rem" }}
+            >
+              <option value="section">
+                Keep / Move to section (ungrouped)
+              </option>
+              {groupsForSection.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.groupName}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => {
+                const target =
+                  editingDish.moveTarget || (currentGroupId ?? "section");
+                // perform move
+                if (target === "section") {
+                  moveDishToGroup(sectionId, editingDish.dishId, "section");
+                } else {
+                  moveDishToGroup(sectionId, editingDish.dishId, target);
+                }
+              }}
+            >
+              Move
+            </button>
+          </div>
+
+          {/* Modifiers editor */}
+          <div style={{ marginTop: "0.5rem" }}>
+            <strong>Modifiers:</strong>
+            {(dDraft.modifiers || []).map((m, idx) => (
+              <div key={m.id || idx}>
+                <input
+                  type="text"
+                  value={m.name}
+                  placeholder="Modifier name"
+                  onChange={(e) => {
+                    const updated = (dDraft.modifiers || []).map((mod, i) =>
+                      i === idx ? { ...mod, name: e.target.value } : mod,
+                    );
+                    onChangeDraft({ ...dDraft, modifiers: updated });
+                  }}
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  value={m.price}
+                  placeholder="Price"
+                  onChange={(e) => {
+                    const updated = (dDraft.modifiers || []).map((mod, i) =>
+                      i === idx
+                        ? { ...mod, price: parseFloat(e.target.value) }
+                        : mod,
+                    );
+                    onChangeDraft({ ...dDraft, modifiers: updated });
+                  }}
+                  style={{ width: "80px", marginLeft: "0.25rem" }}
+                />
+              </div>
+            ))}
+            <button
+              onClick={() =>
+                onChangeDraft({
+                  ...dDraft,
+                  modifiers: [
+                    ...(dDraft.modifiers || []),
+                    { id: Date.now().toString(), name: "", price: 0 },
+                  ],
+                })
+              }
+            >
+              + Add Modifier
+            </button>
+          </div>
+
+          {/* Custom Properties editor */}
+          <div style={{ marginTop: "0.5rem" }}>
+            <strong>Custom Properties:</strong>
+            {(dDraft.customProperties || []).map((p, idx) => (
+              <div key={idx}>
+                <input
+                  type="text"
+                  value={p.key}
+                  placeholder="Property name (e.g. Filling)"
+                  onChange={(e) => {
+                    const updated = (dDraft.customProperties || []).map(
+                      (prop, i) =>
+                        i === idx ? { ...prop, key: e.target.value } : prop,
+                    );
+                    onChangeDraft({ ...dDraft, customProperties: updated });
+                  }}
+                  style={{ marginRight: "0.25rem" }}
+                />
+                <input
+                  type="text"
+                  value={p.value}
+                  placeholder="Value (e.g. Chicken)"
+                  onChange={(e) => {
+                    const updated = (dDraft.customProperties || []).map(
+                      (prop, i) =>
+                        i === idx ? { ...prop, value: e.target.value } : prop,
+                    );
+                    onChangeDraft({ ...dDraft, customProperties: updated });
+                  }}
+                />
+              </div>
+            ))}
+            <button
+              onClick={() =>
+                onChangeDraft({
+                  ...dDraft,
+                  customProperties: [
+                    ...(dDraft.customProperties || []),
+                    { key: "", value: "" },
+                  ],
+                })
+              }
+            >
+              + Add Property
+            </button>
+          </div>
+          <div className="modal-actions">
+            <button className="btn-save" onClick={onSave}>
+              Save
+            </button>
+            <button className="btn-cancel" onClick={onCancel}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
     );
   };
 
   return (
-    <div style={{ padding: "1rem", maxWidth: "880px", margin: "0 auto" }}>
+    <div>
       <h2>Owner View – Build Your Menu</h2>
 
       {/* Restaurant Name */}
@@ -786,7 +795,7 @@ const UniversalMenuForm = () => {
             key={s.id}
             style={{
               marginBottom: "1rem",
-              border: "1px solid #ddd",
+              border: "1px solid red",
               padding: "0.5rem",
             }}
           >
@@ -800,6 +809,15 @@ const UniversalMenuForm = () => {
                 />
                 <button onClick={() => saveSection(s.id)}>Save</button>
                 <button onClick={cancelEditSection}>Cancel</button>
+
+                <div style={{ marginTop: "0.5rem" }}>
+                  <button onClick={() => startAddingDish(s.id)}>
+                    ➕ Add Item
+                  </button>
+                  <button onClick={() => startAddingGroup(s.id)}>
+                    ➕ Create Group
+                  </button>
+                </div>
               </>
             ) : (
               <>
@@ -810,30 +828,8 @@ const UniversalMenuForm = () => {
                 >
                   ✏️
                 </button>
-                <button
-                  style={{ marginLeft: "0.25rem" }}
-                  onClick={() => deleteSection(s.id)}
-                >
-                  ❌
-                </button>
-                <button
-                  style={{ marginLeft: "0.25rem" }}
-                  onClick={() => duplicateSection(s.id)}
-                >
-                  📑
-                </button>
-                <button
-                  style={{ marginLeft: "0.25rem" }}
-                  onClick={() => startAddingDish(s.id)}
-                >
-                  ➕ Add item
-                </button>
-                <button
-                  style={{ marginLeft: "0.25rem" }}
-                  onClick={() => startAddingGroup(s.id)}
-                >
-                  ➕ Create Group
-                </button>
+                <button onClick={() => deleteSection(s.id)}>❌ </button>
+                <button onClick={() => duplicateSection(s.id)}>📑</button>
               </>
             )}
 
@@ -841,52 +837,65 @@ const UniversalMenuForm = () => {
             {addingDishSectionId &&
               addingDishSectionId.sectionId === s.id &&
               addingDishSectionId.groupId == null && (
-                <div
-                  style={{
-                    marginTop: "0.5rem",
-                    borderTop: "1px dashed #ccc",
-                    paddingTop: "0.5rem",
-                  }}
-                >
-                  {renderDishEditor(
-                    dishDraft,
-                    (newDraft) => setDishDraft(newDraft),
-                    () => saveDish(s.id, null),
-                    cancelAddDish,
-                    s.id,
-                    null
-                  )}
+                <div className="modal-overlay">
+                  <div className="modal-card">
+                    {renderDishEditor(
+                      dishDraft,
+                      (newDraft) => setDishDraft(newDraft),
+                      () => saveDish(s.id, null),
+                      cancelAddDish,
+                      s.id,
+                      null,
+                    )}
+                    <div className="modal-actions">
+                      <button
+                        className="btn-save"
+                        onClick={() => saveDish(s.id, null)}
+                      >
+                        Save
+                      </button>
+                      <button className="btn-cancel" onClick={cancelAddDish}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
 
             {/* Groups */}
             {s.groups?.map((g) => (
-              <div
-                key={g.id}
-                style={{
-                  marginLeft: "1rem",
-                  borderLeft: "2px dashed #aaa",
-                  paddingLeft: "1rem",
-                  marginTop: "0.5rem",
-                }}
-              >
+              <div key={g.id}>
                 {editingGroup.groupId === g.id &&
                 editingGroup.sectionId === s.id ? (
-                  <>
-                    <input
-                      type="text"
-                      value={editingGroup.name}
-                      onChange={(e) =>
-                        setEditingGroup({
-                          ...editingGroup,
-                          name: e.target.value,
-                        })
-                      }
-                      style={{ marginRight: "0.5rem" }}
-                    />
-                    <button onClick={saveEditedGroup}>Save</button>
-                    <button onClick={cancelEditGroup}>Cancel</button>
-                  </>
+                  <div className="modal-overlay">
+                    <div className="modal-card">
+                      <input
+                        type="text"
+                        value={editingGroup.name}
+                        onChange={(e) =>
+                          setEditingGroup({
+                            ...editingGroup,
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                      <button className="btn-save" onClick={saveEditedGroup}>
+                        Save
+                      </button>
+                      <button className="btn-cancel" onClick={cancelEditGroup}>
+                        Cancel
+                      </button>
+
+                      <div style={{ marginTop: "0.5rem" }}>
+                        <button
+                          className="btn-add"
+                          onClick={() => startAddingDish(s.id, g.id)}
+                        >
+                          ➕ Add Item
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <strong>{g.groupName}</strong>
@@ -896,23 +905,9 @@ const UniversalMenuForm = () => {
                     >
                       ✏️
                     </button>
-                    <button
-                      style={{ marginLeft: "0.25rem" }}
-                      onClick={() => deleteGroup(s.id, g.id)}
-                    >
-                      ❌
-                    </button>
-                    <button
-                      style={{ marginLeft: "0.25rem" }}
-                      onClick={() => duplicateGroup(s.id, g.id)}
-                    >
+                    <button onClick={() => deleteGroup(s.id, g.id)}>❌</button>
+                    <button onClick={() => duplicateGroup(s.id, g.id)}>
                       📑
-                    </button>
-                    <button
-                      style={{ marginLeft: "0.25rem" }}
-                      onClick={() => startAddingDish(s.id, g.id)}
-                    >
-                      ➕ Add item
                     </button>
                   </>
                 )}
@@ -934,12 +929,12 @@ const UniversalMenuForm = () => {
                         () => saveDish(s.id, g.id),
                         cancelAddDish,
                         s.id,
-                        g.id
+                        g.id,
                       )}
                     </div>
                   )}
 
-                <ul>
+                <div className="dish-grid">
                   {g.items.map((d) => (
                     <li key={d.id} style={{ marginTop: "0.25rem" }}>
                       {editingDish.dishId === d.id &&
@@ -957,78 +952,26 @@ const UniversalMenuForm = () => {
                             saveEditedDish,
                             cancelEditDish,
                             s.id,
-                            g.id
+                            g.id,
                           )}
                         </>
                       ) : (
                         // Display view for grouped item (full controls shown)
-                        <>
-                          <strong>{d.name}</strong> - $
-                          {Number(d.price || 0).toFixed(2)}
-                          {!d.available && (
-                            <span style={{ color: "red" }}> (86’d)</span>
-                          )}
-                          {!d.visible && (
-                            <span style={{ color: "gray" }}> (Hidden)</span>
-                          )}
-                          <br />
-                          <em>{d.description}</em>
-                          <br />
-                          {d.image && (
-                            <img
-                              src={d.image}
-                              alt={d.name}
-                              style={{ width: "100px", borderRadius: "4px" }}
-                            />
-                          )}
-                          {d.modifiers?.length > 0 && (
-                            <ul style={{ marginTop: "0.5rem" }}>
-                              {d.modifiers.map((m) => (
-                                <li key={m.id}>
-                                  {m.name}{" "}
-                                  {m.price > 0 &&
-                                    `(+${Number(m.price || 0).toFixed(2)})`}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                          {d.customProperties?.length > 0 && (
-                            <ul style={{ marginTop: "0.5rem" }}>
-                              {d.customProperties.map((p, idx) => (
-                                <li key={idx}>
-                                  <strong>{p.key}:</strong> {p.value}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                          <button
-                            style={{ marginLeft: "0.25rem" }}
-                            onClick={() => editDish(s.id, d, g.id)}
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            style={{ marginLeft: "0.25rem" }}
-                            onClick={() => deleteDish(s.id, d.id, g.id)}
-                          >
-                            ❌
-                          </button>
-                          <button
-                            style={{ marginLeft: "0.25rem" }}
-                            onClick={() => duplicateDish(s.id, d.id, g.id)}
-                          >
-                            📑
-                          </button>
-                        </>
+                        <ItemCard
+                          item={d}
+                          onEdit={() => editDish(s.id, d, g.id)}
+                          onDelete={() => deleteDish(s.id, g.id)}
+                          onDuplicate={() => duplicateDish(s.id, g.id)}
+                        />
                       )}
                     </li>
                   ))}
-                </ul>
+                </div>
               </div>
             ))}
 
             {/* Ungrouped Items */}
-            <ul>
+            <div className="dish-grid">
               {s.items.map((d) => (
                 <li key={d.id} style={{ marginTop: "0.25rem" }}>
                   {editingDish.dishId === d.id &&
@@ -1043,73 +986,21 @@ const UniversalMenuForm = () => {
                         saveEditedDish,
                         cancelEditDish,
                         s.id,
-                        null
+                        null,
                       )}
                     </>
                   ) : (
                     // Display view for ungrouped item
-                    <>
-                      <strong>{d.name}</strong> - $
-                      {Number(d.price || 0).toFixed(2)}
-                      {!d.available && (
-                        <span style={{ color: "red" }}> (86’d)</span>
-                      )}
-                      {!d.visible && (
-                        <span style={{ color: "gray" }}> (Hidden)</span>
-                      )}
-                      <br />
-                      <em>{d.description}</em>
-                      <br />
-                      {d.image && (
-                        <img
-                          src={d.image}
-                          alt={d.name}
-                          style={{ width: "100px", borderRadius: "4px" }}
-                        />
-                      )}
-                      {d.modifiers?.length > 0 && (
-                        <ul style={{ marginTop: "0.5rem" }}>
-                          {d.modifiers.map((m) => (
-                            <li key={m.id}>
-                              {m.name}{" "}
-                              {m.price > 0 &&
-                                `(+${Number(m.price || 0).toFixed(2)})`}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {d.customProperties?.length > 0 && (
-                        <ul style={{ marginTop: "0.5rem" }}>
-                          {d.customProperties.map((p, idx) => (
-                            <li key={idx}>
-                              <strong>{p.key}:</strong> {p.value}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      <button
-                        style={{ marginLeft: "0.25rem" }}
-                        onClick={() => editDish(s.id, d)}
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        style={{ marginLeft: "0.25rem" }}
-                        onClick={() => deleteDish(s.id, d.id)}
-                      >
-                        ❌
-                      </button>
-                      <button
-                        style={{ marginLeft: "0.25rem" }}
-                        onClick={() => duplicateDish(s.id, d.id)}
-                      >
-                        📑
-                      </button>
-                    </>
+                    <ItemCard
+                      item={d}
+                      onEdit={() => editDish(s.id, d)}
+                      onDelete={() => deleteDish(s.id, d.id)}
+                      onDuplicate={() => duplicateDish(s.id, d.id)}
+                    />
                   )}
                 </li>
               ))}
-            </ul>
+            </div>
 
             {/* Add Group Form */}
             {addingGroupSectionId === s.id && (
